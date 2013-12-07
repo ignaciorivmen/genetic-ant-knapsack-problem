@@ -36,38 +36,44 @@ def doitHard(listWords, textProcessed):
 def wordSeparator(text):
     textProcessed = []
     firstC = 0
+    lettersNumbers = string.ascii_letters + string.digits + "'"
+    lettersSpace = string.ascii_letters + string.whitespace
+    spaces = string.whitespace
+    lenText = len(text)
     for i,c in enumerate(text):
-        if c.isspace():
+        if c in spaces:
             textProcessed.append((text[firstC:i],i-firstC))
+            textProcessed.append((text[i:i+1],'1'))
             firstC = i + 1
-        elif c=="." or c=="!" or c=="?" or c=="," or c=="(" or c==")" or c==":" or c=="_" or c=="<" or c==">" or c=="_":
+        elif c=="'" and i!=lenText-1 and i!=0 and (text[i-1] not in lettersSpace or text[i+1] not in lettersSpace):
+                textProcessed.append((text[firstC:i], i-firstC))
+                textProcessed.append((text[i:i+1],'1'))
+                firstC = i + 1
+        elif c not in lettersNumbers:
             textProcessed.append((text[firstC:i], i-firstC))
             textProcessed.append((text[i:i+1],'1'))
             firstC = i + 1
-#        elif c=="'" and (re.match("[^a-zA-Z]",text[i-1]) or re.match("[^a-zA-Z]",text[i+1])):
-#            textProcessed.append(text[firstC:i])
-#            textProcessed.append(text[i:i+1])
-#            firstC = i + 1
-        elif i==len(text)-1:
+        elif i==lenText-1:
             textProcessed.append((text[firstC:i+1],i+1-firstC))
-    if len(textProcessed) == 0:
-        print "Que mierda es esto"
-        textProcessed.append(text)
     return textProcessed
+
+def to_unicode_or_bust(obj, encoding='utf-8'):
+    if isinstance(obj, basestring):
+        if not isinstance(obj, unicode):
+            obj = unicode(obj, encoding)
+    return obj
 
 def CountOccurencesInText(word,text):
     """Number of occurences of word (case insensitive) in text"""
     #This does not pass the unittests:
-    if isinstance(word, unicode):
-        word = word.encode('utf-8')
-    if isinstance(text, unicode):
-        text = text.encode('utf-8')
+    to_unicode_or_bust(word)
     word = word.lower()
     result = -1
     listWords = wordSeparator(word)
     if (len(listWords)==0 or len(word)>len(text)):
         print "There is no word or word is bigger than text!"
     else:
+        to_unicode_or_bust(text)
         textProcessed = wordSeparator(text)
         if (len(listWords)==1):
             doitSimpleTime = time.time()
@@ -127,24 +133,24 @@ and my name is GEORGES"""
      "I am a senior citizen and I live in the Fun-Plex (Reflexion Mirror) in Sopchoppy, Florida") )
     assert( 1 == CountOccurencesInText("reflexion mirror",
      "Reflexion Mirror\" in Sopchoppy, Florida") )
-#    assert( 1 == CountOccurencesInText("reflexion mirror",
-#     u"I am a senior citizen and I live in the Fun-Plex «Reflexion Mirror» in Sopchoppy, Florida") )
-#    assert( 1 == CountOccurencesInText("reflexion mirror",
-#     u"I am a senior citizen and I live in the Fun-Plex \u201cReflexion Mirror\u201d in Sopchoppy, Florida") )
-#    assert( 1 == CountOccurencesInText("legitimate",
-#     u"who is approved by OILS is completely legitimate: their employees are of legal working age") )
-#    assert( 0 == CountOccurencesInText("legitimate their",
-#     u"who is approved by OILS is completely legitimate: their employees are of legal working age") )
-#    assert( 1 == CountOccurencesInText("get back to me",
-#     u"I hope you will consider this proposal, and get back to me as soon as possible") )
-#    assert( 1 == CountOccurencesInText("skin-care",
-#     u"enable Delavigne and its subsidiaries to create a skin-care monopoly") )
-#    assert( 1 == CountOccurencesInText("skin-care monopoly",
-#     u"enable Delavigne and its subsidiaries to create a skin-care monopoly") )
-#    assert( 0 == CountOccurencesInText("skin-care monopoly in the US",
-#     u"enable Delavigne and its subsidiaries to create a skin-care monopoly") )
-#    assert( 1 == CountOccurencesInText("get back to me",
-#     u"When you know:get back to me") )
+    assert( 1 == CountOccurencesInText("reflexion mirror",
+     u"I am a senior citizen and I live in the Fun-Plex «Reflexion Mirror» in Sopchoppy, Florida") )
+    assert( 1 == CountOccurencesInText("reflexion mirror",
+     u"I am a senior citizen and I live in the Fun-Plex \u201cReflexion Mirror\u201d in Sopchoppy, Florida") )
+    assert( 1 == CountOccurencesInText("legitimate",
+     u"who is approved by OILS is completely legitimate: their employees are of legal working age") )
+    assert( 0 == CountOccurencesInText("legitimate their",
+     u"who is approved by OILS is completely legitimate: their employees are of legal working age") )
+    assert( 1 == CountOccurencesInText("get back to me",
+     u"I hope you will consider this proposal, and get back to me as soon as possible") )
+    assert( 1 == CountOccurencesInText("skin-care",
+     u"enable Delavigne and its subsidiaries to create a skin-care monopoly") )
+    assert( 1 == CountOccurencesInText("skin-care monopoly",
+     u"enable Delavigne and its subsidiaries to create a skin-care monopoly") )
+    assert( 0 == CountOccurencesInText("skin-care monopoly in the US",
+     u"enable Delavigne and its subsidiaries to create a skin-care monopoly") )
+    assert( 1 == CountOccurencesInText("get back to me",
+     u"When you know:get back to me") )
     assert( 1 == CountOccurencesInText("don't be left" , """emergency alarm warning.
 Don't be left unprotected. Order your SSSS3000 today!""" ) )
     assert( 1 == CountOccurencesInText("don" , """emergency alarm warning.
@@ -159,18 +165,18 @@ Don't be left unprotected. Order your don SSSS3000 today!""" ) )
      "I don't take that as a 'yes'?") )
     assert( 1 == CountOccurencesInText("attaching my c.v. to this e-mail",
      "I am attaching my c.v. to this e-mail." ))
-#    assert ( 1 == CountOccurencesInText ( "Linguist", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
-#    assert ( 1 == CountOccurencesInText ( "Linguist Specialist", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
-#    assert ( 1 == CountOccurencesInText ( "Laboratory Floor", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
-#    assert ( 1 == CountOccurencesInText ( "Floor", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
-#    assert ( 1 == CountOccurencesInText ( "Floor", "''Linguist Specialist Found Dead on Laboratory Floor''" ))        
+    assert ( 1 == CountOccurencesInText ( "Linguist", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
+    assert ( 1 == CountOccurencesInText ( "Linguist Specialist", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
+    assert ( 1 == CountOccurencesInText ( "Laboratory Floor", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
+    assert ( 1 == CountOccurencesInText ( "Floor", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
+    assert ( 1 == CountOccurencesInText ( "Floor", "''Linguist Specialist Found Dead on Laboratory Floor''" ))        
     assert ( 1 == CountOccurencesInText ( "Floor", "__Linguist Specialist Found Dead on Laboratory Floor__" ))
-#    assert ( 1 == CountOccurencesInText ( "Floor", "'''''Linguist Specialist Found Dead on Laboratory Floor'''''" ))
-#    assert ( 1 == CountOccurencesInText ( "Linguist", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
-#    assert ( 1 == CountOccurencesInText ( "Linguist", "''Linguist Specialist Found Dead on Laboratory Floor''" ))        
+    assert ( 1 == CountOccurencesInText ( "Floor", "'''''Linguist Specialist Found Dead on Laboratory Floor'''''" ))
+    assert ( 1 == CountOccurencesInText ( "Linguist", "'''Linguist Specialist Found Dead on Laboratory Floor'''" ))
+    assert ( 1 == CountOccurencesInText ( "Linguist", "''Linguist Specialist Found Dead on Laboratory Floor''" ))        
     assert ( 1 == CountOccurencesInText ( "Linguist", "__Linguist Specialist Found Dead on Laboratory Floor__" ))
-#    assert ( 1 == CountOccurencesInText ( "Linguist", "'''''Linguist Specialist Found Dead on Laboratory Floor'''''" ))
-#    assert ( 1 == CountOccurencesInText ( "Floor", """Look: ''Linguist Specialist Found Dead on Laboratory Floor'' is the headline today."""))
+    assert ( 1 == CountOccurencesInText ( "Linguist", "'''''Linguist Specialist Found Dead on Laboratory Floor'''''" ))
+    assert ( 1 == CountOccurencesInText ( "Floor", """Look: ''Linguist Specialist Found Dead on Laboratory Floor'' is the headline today."""))
 
 SampleTextForBench = """
 A Suggestion Box Entry from Bob Carter
